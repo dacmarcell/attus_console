@@ -7,7 +7,7 @@ export interface ToastData {
   message: string;
 }
 
-interface ToastProps {
+interface Props {
   toasts: ToastData[];
   onRemove: (id: string) => void;
 }
@@ -42,7 +42,7 @@ function ToastItem({
   );
 }
 
-export default function Toast({ toasts, onRemove }: ToastProps) {
+export default function Toast({ toasts, onRemove }: Props) {
   if (toasts.length === 0) return null;
 
   return (

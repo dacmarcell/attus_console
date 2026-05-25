@@ -1,11 +1,11 @@
 import { AlertTriangle } from "lucide-react";
 
-interface ErrorBannerProps {
+interface Props {
   message: string;
   onClose: () => void;
 }
 
-export default function ErrorBanner({ message, onClose }: ErrorBannerProps) {
+export default function ErrorBanner({ message, onClose }: Props) {
   return (
     <div className="error-banner">
       <span>

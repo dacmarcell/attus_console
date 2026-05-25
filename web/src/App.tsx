@@ -418,7 +418,6 @@ function App() {
             products={products}
             loading={productsLoading}
             error={productsError}
-            onRefresh={fetchProducts}
             onSaveProduct={handleSaveProduct}
             onDeleteProduct={handleDeleteProduct}
             addToast={addToast}

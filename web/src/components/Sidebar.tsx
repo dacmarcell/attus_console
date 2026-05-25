@@ -1,11 +1,11 @@
 import { Activity, Package, Shield } from "lucide-react";
 
-interface SidebarProps {
+interface Props {
   activeView: "dashboard" | "products";
   setActiveView: (view: "dashboard" | "products") => void;
 }
 
-export default function Sidebar({ activeView, setActiveView }: SidebarProps) {
+export default function Sidebar({ activeView, setActiveView }: Props) {
   return (
     <nav className="sidebar">
       <div className="brand-section">

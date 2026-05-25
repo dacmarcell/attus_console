@@ -1,6 +1,6 @@
 import { AlertTriangle, Check, Info, X } from "lucide-react";
 
-interface ModalProps {
+interface Props {
   isOpen: boolean;
   title: string;
   message: string;
@@ -20,7 +20,7 @@ export default function Modal({
   onClose,
   confirmText = "Confirmar",
   cancelText = "Cancelar",
-}: ModalProps) {
+}: Props) {
   if (!isOpen) return null;
 
   const renderIcon = () => {

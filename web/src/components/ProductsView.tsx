@@ -2,7 +2,6 @@ import {
   AlertTriangle,
   PackageOpen,
   Plus,
-  RefreshCw,
   Search,
   Trash2,
   X,
@@ -19,11 +18,10 @@ interface Product {
   updatedAt: string;
 }
 
-interface ProductsViewProps {
+interface Props {
   products: Product[];
   loading: boolean;
   error: string | null;
-  onRefresh: () => void;
   onSaveProduct: (
     payload: { name: string; description: string; price: number },
     id?: number,
@@ -36,11 +34,10 @@ export default function ProductsView({
   products,
   loading,
   error,
-  onRefresh,
   onSaveProduct,
   onDeleteProduct,
   addToast,
-}: ProductsViewProps) {
+}: Props) {
   const [productSearchQuery, setProductSearchQuery] = useState("");
   const [prodName, setProdName] = useState("");
   const [prodDesc, setProdDesc] = useState("");
@@ -122,14 +119,6 @@ export default function ProductsView({
             }}
           />
         </div>
-        <button
-          type="button"
-          className="btn btn-secondary"
-          style={{ width: "auto" }}
-          onClick={onRefresh}
-        >
-          <RefreshCw size={12} /> Sincronizar
-        </button>
         <button
           type="button"
           className="btn btn-primary"

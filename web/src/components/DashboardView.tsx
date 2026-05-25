@@ -27,7 +27,7 @@ interface Incident {
   createdAt: string;
 }
 
-interface DashboardViewProps {
+interface Props {
   incidents: Incident[];
   loading: boolean;
   error: string | null;
@@ -55,7 +55,7 @@ export default function DashboardView({
   onSimulateIncident,
   isSimulating,
   onForceError,
-}: DashboardViewProps) {
+}: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSeverity, setSelectedSeverity] = useState("ALL");
   const [appInput, setAppInput] = useState("payment-api");
