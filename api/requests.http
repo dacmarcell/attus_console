@@ -1,11 +1,19 @@
+### Variáveis de Configuração
 @baseUrl = http://localhost:8080/api
+@produtosUrl = {{baseUrl}}/produtos
+@logsUrl = {{baseUrl}}/logs
+@incidentsUrl = {{baseUrl}}/incidents
 
-### 1. Listar todos os produtos
-GET {{baseUrl}}/produtos
+# ==========================================
+# SEÇÃO 1: TESTES DE PRODUTOS (CRUD)
+# ==========================================
+
+### 1.1 Listar todos os produtos
+GET {{produtosUrl}}
 Accept: application/json
 
-### 2. Criar um novo produto com sucesso
-POST {{baseUrl}}/produtos
+### 1.2 Criar um novo produto com sucesso
+POST {{produtosUrl}}
 Content-Type: application/json
 Accept: application/json
 
@@ -15,8 +23,8 @@ Accept: application/json
   "price": 289.90
 }
 
-### 3. Tentar criar um produto inválido (Preço negativo - HTTP 400)
-POST {{baseUrl}}/produtos
+### 1.3 Tentar criar um produto inválido (Preço negativo - HTTP 400)
+POST {{produtosUrl}}
 Content-Type: application/json
 Accept: application/json
 
@@ -26,36 +34,57 @@ Accept: application/json
   "price": -15.50
 }
 
-### 4. Tentar criar um produto inválido (Nome vazio - HTTP 400)
-POST {{baseUrl}}/produtos
+### 1.4 Buscar produto existente por ID
+# Nota: Ajuste o ID "1" conforme o id gerado no teste
+GET {{produtosUrl}}/1
+Accept: application/json
+
+### 1.5 Buscar produto inexistente por ID (HTTP 404)
+GET {{produtosUrl}}/999
+Accept: application/json
+
+# ==========================================
+# SEÇÃO 2: TESTES DE INGESTÃO DE LOGS e INCIDENTES
+# ==========================================
+
+### 2.1 Listar incidentes inicial (deve retornar vazio se não houver recorrência)
+GET {{incidentsUrl}}
+Accept: application/json
+
+### 2.2 Enviar um log individual (não gera incidente até atingir 5 ocorrências em 5 min)
+POST {{logsUrl}}
 Content-Type: application/json
 Accept: application/json
 
 {
-  "name": "",
-  "description": "Produto sem nome",
-  "price": 99.90
+  "application": "payment-api",
+  "environment": "production",
+  "level": "ERROR",
+  "message": "Connection timed out with gateway after 5000ms",
+  "stackTrace": "java.net.SocketTimeoutException: Connect timed out\n\tat java.net.PlainSocketImpl.socketConnect(Native Method)"
 }
 
-### 5. Buscar produto existente por ID
-GET {{baseUrl}}/produtos/1
+### 2.4 Listar incidentes
+GET {{incidentsUrl}}
 Accept: application/json
 
-### 6. Buscar produto inexistente por ID (HTTP 404)
-GET {{baseUrl}}/produtos/999
-Accept: application/json
+# ==========================================
+# SIMULAÇÃO DE INCIDENTE: DATABASE_FAILURE
+# Envie 5 vezes este log para simular falha crítica de banco
+# ==========================================
 
-### 7. Atualizar produto existente por ID
-PUT {{baseUrl}}/produtos/1
+### 2.5.1 Enviar Log de Banco
+POST {{logsUrl}}
 Content-Type: application/json
-Accept: application/json
 
 {
-  "name": "Teclado Mecânico RGB Premium",
-  "description": "Switch Red ergonômico com iluminação RGB e chassi em alumínio",
-  "price": 329.90
+  "application": "customer-service",
+  "environment": "staging",
+  "level": "FATAL",
+  "message": "HikariPool-1 - Connection refused to database server at host postgres-primary:5432",
+  "stackTrace": "org.postgresql.util.PSQLException: Connection refused"
 }
 
-### 8. Excluir produto por ID
-DELETE {{baseUrl}}/produtos/1
+### 2.6 Listar todos os incidentes
+GET {{incidentsUrl}}
 Accept: application/json
