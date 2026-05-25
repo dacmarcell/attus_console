@@ -1,0 +1,38 @@
+import { Shield, Activity, Package } from 'lucide-react'
+
+interface SidebarProps {
+  activeView: 'dashboard' | 'products'
+  setActiveView: (view: 'dashboard' | 'products') => void
+}
+
+export default function Sidebar({ activeView, setActiveView }: SidebarProps) {
+  return (
+    <nav className="sidebar">
+      <div className="brand-section">
+        <Shield size={24} style={{ color: 'var(--accent-color)' }} />
+        <span className="brand-name">Attus Console</span>
+      </div>
+
+      <ul className="nav-list">
+        <li>
+          <button 
+            className={`nav-item-btn ${activeView === 'dashboard' ? 'active' : ''}`}
+            onClick={() => setActiveView('dashboard')}
+          >
+            <Activity size={18} />
+            Incidentes
+          </button>
+        </li>
+        <li>
+          <button 
+            className={`nav-item-btn ${activeView === 'products' ? 'active' : ''}`}
+            onClick={() => setActiveView('products')}
+          >
+            <Package size={18} />
+            Produtos
+          </button>
+        </li>
+      </ul>
+    </nav>
+  )
+}

@@ -1,26 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
-import {
-  Shield,
-  Activity,
-  Package,
-  WifiOff,
-  Database,
-  Cpu,
-  Bug,
-  Terminal,
-  RefreshCw,
-  Send,
-  Plus,
-  Pencil,
-  Trash2,
-  AlertTriangle,
-  PackageOpen,
-  FolderOpen,
-  Clock,
-  Search,
-  Check,
-  Lightbulb,
-} from "lucide-react";
+import { useState, useEffect } from "react";
+
+// Import modular components
+import Sidebar from "./components/Sidebar";
+import ErrorBanner from "./components/ErrorBanner";
+import DashboardView from "./components/DashboardView";
+import ProductsView from "./components/ProductsView";
 
 interface Incident {
   id: string;
@@ -43,7 +27,7 @@ interface Product {
 }
 
 function App() {
-  // Navigation State
+  // Navigation Routing State
   const [activeView, setActiveView] = useState<"dashboard" | "products">(
     "dashboard",
   );
@@ -51,29 +35,25 @@ function App() {
   // API Config
   const API_BASE_URL = "http://localhost:8080/api";
 
+  // ==========================================
+  // SHARED STATES
+  // ==========================================
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [dashboardLoading, setDashboardLoading] = useState(true);
   const [dashboardError, setDashboardError] = useState<string | null>(null);
 
-  // Dashboard Search and Filter States
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSeverity, setSelectedSeverity] = useState<string>("ALL");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [productsError, setProductsError] = useState<string | null>(null);
 
-  // Log Form State
-  const [appInput, setAppInput] = useState("payment-api");
-  const [envInput, setEnvInput] = useState("production");
-  const [levelInput, setLevelInput] = useState("ERROR");
-  const [messageInput, setMessageInput] = useState(
-    "Connection timeout on gateway",
-  );
-  const [stackTraceInput, setStackTraceInput] = useState(
-    "java.net.SocketTimeoutException: Connect timed out",
-  );
-
-  // Global Error Capture state
   const [errorBannerMsg, setErrorBannerMsg] = useState<string | null>(null);
   const [isSendingSimulated, setIsSendingSimulated] = useState(false);
 
+  // ==========================================
+  // API SERVICE CALLS
+  // ==========================================
+
+  // Fetch all incidents
   const fetchIncidents = async () => {
     try {
       setDashboardError(null);
@@ -81,44 +61,59 @@ function App() {
       if (!res.ok) throw new Error("Falha ao obter incidentes da API.");
       const data = await res.json();
       setIncidents(data);
-    } catch (err: unknown) {
-      setDashboardError(
-        (err as Error).message || "Erro ao carregar incidentes.",
-      );
+    } catch (err: any) {
+      setDashboardError(err.message || "Erro ao carregar incidentes.");
     } finally {
       setDashboardLoading(false);
     }
   };
 
-  // Submit manual log form
-  const handleManualSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!messageInput.trim()) return;
+  // Fetch all products
+  const fetchProducts = async () => {
+    try {
+      setProductsError(null);
+      const res = await fetch(`${API_BASE_URL}/produtos`);
+      if (!res.ok) throw new Error("Falha ao carregar produtos do servidor.");
+      const data = await res.json();
+      setProducts(data);
+    } catch (err: any) {
+      setProductsError(err.message || "Erro ao obter produtos.");
+    } finally {
+      setProductsLoading(false);
+    }
+  };
 
+  // ==========================================
+  // ACTION CALLBACK HANDLERS
+  // ==========================================
+
+  // Submit manual log
+  const handleManualLogSubmit = async (log: {
+    application: string;
+    environment: string;
+    level: string;
+    message: string;
+    stackTrace: string;
+  }): Promise<boolean> => {
     try {
       const res = await fetch(`${API_BASE_URL}/logs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          application: appInput,
-          environment: envInput,
-          level: levelInput,
-          message: messageInput,
-          stackTrace: stackTraceInput,
-        }),
+        body: JSON.stringify(log),
       });
 
-      if (!res.ok) throw new Error("Falha ao enviar log.");
+      if (!res.ok) throw new Error("Falha ao enviar log para a API.");
 
-      setMessageInput("");
       fetchIncidents();
       alert("Log ingerido com sucesso! A análise de incidentes foi executada.");
-    } catch (err: unknown) {
-      alert((err as Error).message || "Erro ao enviar log manual.");
+      return true;
+    } catch (err: any) {
+      alert(err.message || "Erro ao enviar log manual.");
+      return false;
     }
   };
 
-  // Simulates 5 logs consecutively to trigger automatic incident creation
+  // Simulate 5 logs consecutively to trigger incident
   const handleSimulateIncident = async (
     type: "TIMEOUT" | "DATABASE" | "MEMORY",
   ) => {
@@ -137,8 +132,7 @@ function App() {
         environment: "production",
         level: "ERROR",
         message: "Gateway Timeout connecting to bank server after 5000ms",
-        stackTrace:
-          "java.net.SocketTimeoutException: Connection timed out\n\tat java.net.PlainSocketImpl.socketConnect(Native Method)",
+        stackTrace: "java.net.SocketTimeoutException: Connection timed out",
       };
     } else if (type === "DATABASE") {
       logPayload = {
@@ -147,8 +141,7 @@ function App() {
         level: "FATAL",
         message:
           "HikariPool-1 - Connection refused: Could not connect to database at postgres-primary:5432",
-        stackTrace:
-          "org.postgresql.util.PSQLException: Connection refused\n\tat org.postgresql.core.v3.ConnectionFactoryImpl.openConnection",
+        stackTrace: "org.postgresql.util.PSQLException: Connection refused",
       };
     } else if (type === "MEMORY") {
       logPayload = {
@@ -156,8 +149,7 @@ function App() {
         environment: "staging",
         level: "ERROR",
         message: "OutOfMemoryError: Java heap space during batch processing",
-        stackTrace:
-          "java.lang.OutOfMemoryError: Java heap space\n\tat java.util.Arrays.copyOf(Arrays.java:3512)",
+        stackTrace: "java.lang.OutOfMemoryError: Java heap space",
       };
     }
 
@@ -172,89 +164,25 @@ function App() {
 
       await fetchIncidents();
       alert(
-        `Sucesso! 5 logs de ${type} foram ingeridos. Incidentes atualizados no Dashboard!`,
+        `Sucesso! 5 logs de ${type} foram ingeridos consecutivamente. Verifique o painel!`,
       );
-    } catch (err: unknown) {
-      alert("Falha ao simular incidente: " + (err as Error).message);
+    } catch (err: any) {
+      alert("Falha ao simular incidente: " + err.message);
     } finally {
       setIsSendingSimulated(false);
     }
   };
 
-  // Helper to force an error to test window.onerror
-  const triggerBrowserException = () => {
-    throw new Error("Simulação de exceção não tratada no navegador!");
-  };
-
-  // Filter and Search logic for Incidents
-  const filteredIncidents = incidents.filter((inc) => {
-    const matchesSearch =
-      inc.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      inc.message.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesSeverity =
-      selectedSeverity === "ALL" || inc.severity === selectedSeverity;
-
-    return matchesSearch && matchesSeverity;
-  });
-
-  // ==========================================
-  // PRODUCTS CRUD STATE & LOGIC
-  // ==========================================
-  const [products, setProducts] = useState<Product[]>([]);
-  const [productsLoading, setProductsLoading] = useState(true);
-  const [productsError, setProductsError] = useState<string | null>(null);
-  const [productSearchQuery, setProductSearchQuery] = useState("");
-
-  // Product Form Input States
-  const [prodName, setProdName] = useState("");
-  const [prodDesc, setProdDesc] = useState("");
-  const [prodPrice, setProdPrice] = useState("");
-
-  // Track if we are currently editing a product
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-
-  // Fetch all products
-  const fetchProducts = async () => {
-    try {
-      setProductsError(null);
-      const res = await fetch(`${API_BASE_URL}/produtos`);
-      if (!res.ok) throw new Error("Falha ao carregar produtos do servidor.");
-      const data = await res.json();
-      setProducts(data);
-    } catch (err: unknown) {
-      setProductsError((err as Error).message || "Erro ao obter produtos.");
-    } finally {
-      setProductsLoading(false);
-    }
-  };
-
-  // Handle product form submission (Create or Update)
-  const handleSubmitProduct = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!prodName.trim()) {
-      alert("O nome do produto é obrigatório.");
-      return;
-    }
-
-    const parsedPrice = parseFloat(prodPrice);
-    if (isNaN(parsedPrice) || parsedPrice <= 0) {
-      alert("Insira um preço válido maior que zero.");
-      return;
-    }
-
-    const payload = {
-      name: prodName,
-      description: prodDesc,
-      price: parsedPrice,
-    };
-
+  // Handle product save action (Unified POST / PUT callback)
+  const handleSaveProduct = async (
+    payload: { name: string; description: string; price: number },
+    id?: number,
+  ): Promise<boolean> => {
     try {
       let res;
-      if (editingProduct) {
+      if (id) {
         // Edit Action (PUT)
-        res = await fetch(`${API_BASE_URL}/produtos/${editingProduct.id}`, {
+        res = await fetch(`${API_BASE_URL}/produtos/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -273,33 +201,25 @@ function App() {
         throw new Error(
           errorData.validationErrors
             ? Object.values(errorData.validationErrors).join(", ")
-            : "Erro ao processar produto.",
+            : "Erro ao processar produto na API.",
         );
       }
 
-      // Reset form states
-      setProdName("");
-      setProdDesc("");
-      setProdPrice("");
-      setEditingProduct(null);
-
-      // Refresh list
       fetchProducts();
       alert(
-        editingProduct
+        id
           ? "Produto atualizado com sucesso!"
-          : "Produto criado com sucesso!",
+          : "Produto cadastrado com sucesso!",
       );
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return true;
     } catch (err: any) {
       alert(err.message || "Ocorreu um erro ao salvar o produto.");
+      return false;
     }
   };
 
   // Delete product
   const handleDeleteProduct = async (id: number) => {
-    if (!confirm("Deseja realmente excluir este produto?")) return;
-
     try {
       const res = await fetch(`${API_BASE_URL}/produtos/${id}`, {
         method: "DELETE",
@@ -309,39 +229,19 @@ function App() {
 
       fetchProducts();
       alert("Produto excluído com sucesso!");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       alert(err.message || "Erro ao excluir produto.");
     }
   };
 
-  // Populate form to start editing
-  const handleStartEdit = (product: Product) => {
-    setEditingProduct(product);
-    setProdName(product.name);
-    setProdDesc(product.description || "");
-    setProdPrice(product.price.toString());
+  // Force an intentional browser exception
+  const triggerBrowserException = () => {
+    throw new Error("Simulação de exceção não tratada no navegador!");
   };
 
-  // Cancel editing flow
-  const handleCancelEdit = () => {
-    setEditingProduct(null);
-    setProdName("");
-    setProdDesc("");
-    setProdPrice("");
-  };
-
-  // Filter products by search query
-  const filteredProducts = products.filter(
-    (prod) =>
-      prod.name.toLowerCase().includes(productSearchQuery.toLowerCase()) ||
-      (prod.description &&
-        prod.description
-          .toLowerCase()
-          .includes(productSearchQuery.toLowerCase())),
-  );
-
-  const sendBrowserLog = useCallback(async (msg: string, stack: string) => {
+  // Send errors caught globally by the web app
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const sendBrowserLog = async (msg: string, stack: string) => {
     try {
       await fetch(`${API_BASE_URL}/logs`, {
         method: "POST",
@@ -358,11 +258,11 @@ function App() {
     } catch (e) {
       console.error("Erro ao enviar log automático:", e);
     }
-  }, []);
+  };
 
-  // Error capture
+  // SHARED GLOBAL LIFECYCLE (Error capture)
   useEffect(() => {
-    // Initial fetches
+    // Initial fetch of DB resources
     fetchIncidents();
     fetchProducts();
 
@@ -405,7 +305,7 @@ function App() {
     };
   }, [sendBrowserLog]);
 
-  // Format date helper
+  // Helper date formatter
   const formatDate = (dateStr: string) => {
     try {
       const date = new Date(dateStr);
@@ -415,586 +315,19 @@ function App() {
     }
   };
 
-  // ==========================================
-  // SUB-RENDER: INCIDENT DASHBOARD
-  // ==========================================
-  const renderDashboardView = () => (
-    <div className="dashboard-grid">
-      {/* Left column: Controls and Simulation */}
-      <section
-        style={{ display: "flex", flexDirection: "column", gap: "24px" }}
-      >
-        {/* Simulator Panel */}
-        <div className="panel">
-          <h2 className="panel-title">
-            <Activity size={20} style={{ color: "var(--accent-color)" }} />{" "}
-            Simulador de Incidentes
-          </h2>
-          <p className="panel-subtitle">
-            Dispare rapidamente uma sequência de 5 logs idênticos à API para
-            testar as regras de agrupamento de incidentes da V1.
-          </p>
-
-          <div className="simulator-buttons">
-            <button
-              className="btn-simulator"
-              onClick={() => handleSimulateIncident("TIMEOUT")}
-              disabled={isSendingSimulated}
-            >
-              <div className="simulator-title">
-                <WifiOff size={16} style={{ color: "var(--severity-high)" }} />{" "}
-                Exceção de Timeout
-              </div>
-              <div className="simulator-desc">
-                Gera incidente NETWORK_TIMEOUT (HIGH)
-              </div>
-            </button>
-
-            <button
-              className="btn-simulator"
-              onClick={() => handleSimulateIncident("DATABASE")}
-              disabled={isSendingSimulated}
-            >
-              <div className="simulator-title">
-                <Database
-                  size={16}
-                  style={{ color: "var(--severity-critical)" }}
-                />{" "}
-                Falha de Banco de Dados
-              </div>
-              <div className="simulator-desc">
-                Gera incidente DATABASE_FAILURE (CRITICAL)
-              </div>
-            </button>
-
-            <button
-              className="btn-simulator"
-              onClick={() => handleSimulateIncident("MEMORY")}
-              disabled={isSendingSimulated}
-            >
-              <div className="simulator-title">
-                <Cpu size={16} style={{ color: "var(--severity-critical)" }} />{" "}
-                Estouro de Memória Heap
-              </div>
-              <div className="simulator-desc">
-                Gera incidente MEMORY_LEAK (CRITICAL)
-              </div>
-            </button>
-
-            <button
-              className="btn btn-secondary"
-              style={{ marginTop: "10px" }}
-              onClick={triggerBrowserException}
-            >
-              <Bug size={16} /> Forçar Erro JavaScript
-            </button>
-          </div>
-        </div>
-
-        {/* Log Ingest Form Panel */}
-        <div className="panel">
-          <h2 className="panel-title">
-            <Terminal size={20} style={{ color: "var(--accent-color)" }} />{" "}
-            Ingestão de Log
-          </h2>
-          <form onSubmit={handleManualSubmit}>
-            <div className="form-group">
-              <label className="form-label">Aplicação</label>
-              <input
-                type="text"
-                className="form-input"
-                value={appInput}
-                onChange={(e) => setAppInput(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Ambiente</label>
-              <input
-                type="text"
-                className="form-input"
-                value={envInput}
-                onChange={(e) => setEnvInput(e.target.value)}
-                required
-              />
-            </div>
-
-            <div
-              className="form-group"
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "8px",
-              }}
-            >
-              <div>
-                <label className="form-label">Nível</label>
-                <select
-                  className="form-select"
-                  value={levelInput}
-                  onChange={(e) => setLevelInput(e.target.value)}
-                >
-                  <option value="INFO">INFO</option>
-                  <option value="WARN">WARN</option>
-                  <option value="ERROR">ERROR</option>
-                  <option value="FATAL">FATAL</option>
-                </select>
-              </div>
-              <div>
-                <label className="form-label">Sincronizar</label>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={fetchIncidents}
-                >
-                  <RefreshCw size={12} /> Atualizar
-                </button>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Mensagem do Erro</label>
-              <input
-                type="text"
-                className="form-input"
-                value={messageInput}
-                onChange={(e) => setMessageInput(e.target.value)}
-                placeholder="Ex: Connection timed out"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Stack Trace (Opcional)</label>
-              <textarea
-                className="form-textarea"
-                value={stackTraceInput}
-                onChange={(e) => setStackTraceInput(e.target.value)}
-                placeholder="StackTrace..."
-              />
-            </div>
-
-            <button type="submit" className="btn btn-primary">
-              <Send size={14} /> Enviar Log Individual
-            </button>
-          </form>
-        </div>
-      </section>
-
-      {/* Right column: Dashboard display */}
-      <section>
-        {/* Filters Bar */}
-        <div className="filters-bar">
-          <div
-            className="search-input-wrapper"
-            style={{ position: "relative" }}
-          >
-            <input
-              type="text"
-              className="form-input"
-              placeholder="Buscar incidentes por tipo ou mensagem de erro..."
-              style={{ paddingLeft: "35px" }}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <Search
-              size={16}
-              style={{
-                position: "absolute",
-                left: "12px",
-                top: "12px",
-                color: "var(--text-secondary)",
-              }}
-            />
-          </div>
-
-          <div className="severity-tabs">
-            {["ALL", "CRITICAL", "HIGH", "MEDIUM", "LOW"].map((sev) => (
-              <button
-                key={sev}
-                className={`tab-btn ${selectedSeverity === sev ? "active" : ""}`}
-                onClick={() => setSelectedSeverity(sev)}
-              >
-                {sev === "ALL" ? "Todos" : sev}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* API Error Status */}
-        {dashboardError && (
-          <div
-            className="panel"
-            style={{
-              borderColor: "var(--severity-critical)",
-              color: "var(--severity-critical)",
-              marginBottom: "20px",
-            }}
-          >
-            <AlertTriangle
-              size={18}
-              style={{ marginRight: "8px", verticalAlign: "middle" }}
-            />
-            <strong>Conectividade API:</strong> {dashboardError}. Verifique se o
-            backend está ativo na porta 8080.
-          </div>
-        )}
-
-        {/* Loading state */}
-        {dashboardLoading ? (
-          <div className="loader-container">
-            <div className="spinner"></div>
-            <p>Buscando console de incidentes...</p>
-          </div>
-        ) : filteredIncidents.length === 0 ? (
-          /* Empty State */
-          <div className="empty-state">
-            <FolderOpen size={48} className="empty-state-icon" />
-            <h3>Nenhum incidente ativo</h3>
-            <p>
-              {searchQuery || selectedSeverity !== "ALL"
-                ? "Nenhum incidente corresponde à busca e filtros."
-                : "Excelente! Nenhum erro com mais de 5 repetições nos últimos 5 minutos."}
-            </p>
-          </div>
-        ) : (
-          /* List of incidents */
-          <div className="incidents-list">
-            {filteredIncidents.map((incident) => {
-              const severityLower = incident.severity.toLowerCase();
-              return (
-                <article key={incident.id} className="incident-card">
-                  <div className="incident-header">
-                    <div className="incident-type-group">
-                      <span className={`badge badge-${severityLower}`}>
-                        {incident.severity}
-                      </span>
-                      <h3 className="incident-type">{incident.type}</h3>
-                    </div>
-
-                    <div className="occurrences-counter">
-                      <AlertTriangle
-                        size={14}
-                        style={{
-                          marginRight: "4px",
-                          display: "inline",
-                          verticalAlign: "middle",
-                        }}
-                      />
-                      <strong>{incident.occurrences}</strong> ocorrências
-                    </div>
-                  </div>
-
-                  <div className="incident-date">
-                    <Clock
-                      size={12}
-                      style={{ marginRight: "5px", verticalAlign: "middle" }}
-                    />
-                    Data da ocorrência: {formatDate(incident.createdAt)}
-                  </div>
-
-                  <p className="incident-message">{incident.message}</p>
-
-                  <div className="suggestions-grid">
-                    <div className="suggestion-block">
-                      <h4>
-                        <Lightbulb style={{ width: 15, height: 15 }} />{" "}
-                        Recomendações
-                      </h4>
-                      <ul>
-                        {incident.recommendations.split(";").map((rec, i) => (
-                          <li key={i}>{rec.trim()}</li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="suggestion-block">
-                      <h4>
-                        <Shield style={{ width: 15, height: 15 }} /> Medidas
-                        Preventivas
-                      </h4>
-                      <ul>
-                        {incident.preventions.split(";").map((prev, i) => (
-                          <li key={i}>{prev.trim()}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        )}
-      </section>
-    </div>
-  );
-
-  // ==========================================
-  // SUB-RENDER: PRODUCTS CRUD
-  // ==========================================
-  const renderProductsView = () => (
-    <div className="products-layout">
-      {/* Left Column: Product Listing Grid */}
-      <section>
-        {/* Filters and search for products */}
-        <div className="filters-bar">
-          <div
-            className="search-input-wrapper"
-            style={{ position: "relative" }}
-          >
-            <input
-              type="text"
-              className="form-input"
-              placeholder="Buscar produtos cadastrados pelo nome..."
-              style={{ paddingLeft: "35px" }}
-              value={productSearchQuery}
-              onChange={(e) => setProductSearchQuery(e.target.value)}
-            />
-            <Search
-              size={16}
-              style={{
-                position: "absolute",
-                left: "12px",
-                top: "12px",
-                color: "var(--text-secondary)",
-              }}
-            />
-          </div>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            style={{ width: "auto" }}
-            onClick={fetchProducts}
-          >
-            <RefreshCw size={12} /> Sincronizar
-          </button>
-        </div>
-
-        {/* API Error Status for Products */}
-        {productsError && (
-          <div
-            className="panel"
-            style={{
-              borderColor: "var(--color-danger)",
-              color: "var(--color-danger)",
-              marginBottom: "20px",
-            }}
-          >
-            <AlertTriangle
-              size={18}
-              style={{ marginRight: "8px", verticalAlign: "middle" }}
-            />
-            <strong>Erro de Rede:</strong> {productsError}
-          </div>
-        )}
-
-        {/* Loading and display grid */}
-        {productsLoading ? (
-          <div className="loader-container">
-            <div className="spinner"></div>
-            <p>Carregando base de produtos...</p>
-          </div>
-        ) : filteredProducts.length === 0 ? (
-          <div className="empty-state">
-            <PackageOpen size={48} className="empty-state-icon" />
-            <h3>Nenhum produto cadastrado</h3>
-            <p>
-              {productSearchQuery
-                ? "Nenhum resultado corresponde à sua busca."
-                : "Cadastre o seu primeiro produto utilizando o formulário lateral!"}
-            </p>
-          </div>
-        ) : (
-          <div className="product-grid">
-            {filteredProducts.map((product) => (
-              <article key={product.id} className="product-card">
-                <div className="product-details">
-                  <div className="product-name">{product.name}</div>
-                  <div className="product-desc">
-                    {product.description || "Sem descrição."}
-                  </div>
-                  <div className="product-price-tag">
-                    R${" "}
-                    {product.price.toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </div>
-                </div>
-
-                <div className="product-card-footer">
-                  <span className="product-meta">ID: {product.id}</span>
-                  <div className="btn-action-group">
-                    <button
-                      className="btn-action btn-action-edit"
-                      onClick={() => handleStartEdit(product)}
-                    >
-                      <Pencil
-                        size={12}
-                        style={{
-                          display: "inline",
-                          marginRight: "4px",
-                          verticalAlign: "middle",
-                        }}
-                      />{" "}
-                      Editar
-                    </button>
-                    <button
-                      className="btn-action btn-action-delete"
-                      onClick={() => handleDeleteProduct(product.id)}
-                    >
-                      <Trash2
-                        size={12}
-                        style={{
-                          display: "inline",
-                          marginRight: "4px",
-                          verticalAlign: "middle",
-                        }}
-                      />{" "}
-                      Deletar
-                    </button>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* Right Column: Manage Product Form */}
-      <section>
-        <div className="panel">
-          <h2 className="panel-title">
-            {editingProduct ? (
-              <Pencil size={20} style={{ color: "var(--accent-color)" }} />
-            ) : (
-              <Plus size={20} style={{ color: "var(--accent-color)" }} />
-            )}
-            {editingProduct ? "Editar Produto" : "Cadastrar Produto"}
-          </h2>
-          <p className="panel-subtitle">
-            {editingProduct
-              ? `Atualizando informações do produto ID ${editingProduct.id}.`
-              : "Adicione novos produtos à base de dados executando o formulário completo."}
-          </p>
-
-          <form onSubmit={handleSubmitProduct}>
-            <div className="form-group">
-              <label className="form-label">Nome do Produto</label>
-              <input
-                type="text"
-                className="form-input"
-                placeholder="Ex: Teclado Mecânico RGB"
-                value={prodName}
-                onChange={(e) => setProdName(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Preço (R$)</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0.01"
-                className="form-input"
-                placeholder="Ex: 299.90"
-                value={prodPrice}
-                onChange={(e) => setProdPrice(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Descrição</label>
-              <textarea
-                className="form-textarea"
-                placeholder="Ex: Teclado ABNT2 com switch Red mecânico"
-                value={prodDesc}
-                onChange={(e) => setProdDesc(e.target.value)}
-              />
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "8px",
-                marginTop: "10px",
-              }}
-            >
-              <button type="submit" className="btn btn-primary">
-                {editingProduct ? <Check size={16} /> : <Plus size={16} />}
-                {editingProduct ? "Salvar Alterações" : "Cadastrar"}
-              </button>
-
-              {editingProduct && (
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={handleCancelEdit}
-                >
-                  Cancelar
-                </button>
-              )}
-            </div>
-          </form>
-        </div>
-      </section>
-    </div>
-  );
-
   return (
     <div className="app-container">
-      {/* Sidebar Section */}
-      <nav className="sidebar">
-        <div className="brand-section">
-          <Shield size={24} style={{ color: "var(--accent-color)" }} />
-          <span className="brand-name">Attus Console</span>
-        </div>
-
-        <ul className="nav-list">
-          <li>
-            <button
-              className={`nav-item-btn ${activeView === "dashboard" ? "active" : ""}`}
-              onClick={() => setActiveView("dashboard")}
-            >
-              <Activity size={18} />
-              Incidentes
-            </button>
-          </li>
-          <li>
-            <button
-              className={`nav-item-btn ${activeView === "products" ? "active" : ""}`}
-              onClick={() => setActiveView("products")}
-            >
-              <Package size={18} />
-              Produtos
-            </button>
-          </li>
-        </ul>
-      </nav>
+      {/* Sidebar Navigation */}
+      <Sidebar activeView={activeView} setActiveView={setActiveView} />
 
       {/* Main Workspace Area */}
       <div className="main-content">
         {/* Global Error Banner */}
         {errorBannerMsg && (
-          <div className="error-banner">
-            <span>
-              <AlertTriangle
-                size={18}
-                style={{ marginRight: "8px", verticalAlign: "middle" }}
-              />
-              {errorBannerMsg}
-            </span>
-            <button
-              className="error-banner-btn"
-              onClick={() => setErrorBannerMsg(null)}
-            >
-              Fechar
-            </button>
-          </div>
+          <ErrorBanner
+            message={errorBannerMsg}
+            onClose={() => setErrorBannerMsg(null)}
+          />
         )}
 
         {/* Dynamic header title based on active tab */}
@@ -1011,10 +344,29 @@ function App() {
           </p>
         </div>
 
-        {/* View Switch */}
-        {activeView === "dashboard"
-          ? renderDashboardView()
-          : renderProductsView()}
+        {/* View Routing Switch */}
+        {activeView === "dashboard" ? (
+          <DashboardView
+            incidents={incidents}
+            loading={dashboardLoading}
+            error={dashboardError}
+            onRefresh={fetchIncidents}
+            onManualLogSubmit={handleManualLogSubmit}
+            onSimulateIncident={handleSimulateIncident}
+            isSimulating={isSendingSimulated}
+            onForceError={triggerBrowserException}
+            formatDate={formatDate}
+          />
+        ) : (
+          <ProductsView
+            products={products}
+            loading={productsLoading}
+            error={productsError}
+            onRefresh={fetchProducts}
+            onSaveProduct={handleSaveProduct}
+            onDeleteProduct={handleDeleteProduct}
+          />
+        )}
       </div>
     </div>
   );
