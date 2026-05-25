@@ -1,4 +1,4 @@
-import { Activity, Package, Shield } from "lucide-react";
+import { Activity, Package } from "lucide-react";
 
 interface Props {
   activeView: "dashboard" | "products";
@@ -9,7 +9,13 @@ export default function Sidebar({ activeView, setActiveView }: Props) {
   return (
     <nav className="sidebar">
       <div className="brand-section">
-        <Shield size={24} style={{ color: "var(--accent-color)" }} />
+        <img
+          src="/logo.png"
+          alt="Attus Console"
+          className="brand-icon"
+          width={32}
+          height={32}
+        />
         <span className="brand-name">Attus Console</span>
       </div>
 
