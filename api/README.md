@@ -71,7 +71,7 @@ A API responde no formato JSON (`application/json`) e roda por padrão na porta 
   }
   ```
 - **Resposta (201 Created):** Retorna o produto cadastrado com ID e carimbos de tempo.
-- **Erro de Validação (400 Bad Request):** Nome vazio ou preço negativo/nulo.
+- **Erro de Validação (400 Bad Request):** Corpo inválido (ex.: nome vazio, nome com mais de 150 caracteres, descrição com mais de 5000 caracteres, preço nulo/negativo ou fora do formato numérico `precision=10, scale=2`).
 
 #### Buscar por ID (`GET /api/produtos/{id}`)
 
