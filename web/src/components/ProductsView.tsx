@@ -94,10 +94,7 @@ export default function ProductsView({
       price: parsedPrice,
     };
 
-    const success = await onSaveProduct(
-      payload,
-      editingProductId ?? undefined,
-    );
+    const success = await onSaveProduct(payload, editingProductId ?? undefined);
 
     if (success) {
       closeFormModal();
@@ -248,7 +245,10 @@ export default function ProductsView({
               <h3 className="modal-title" style={{ marginBottom: 0 }}>
                 <span className="modal-form-icon">
                   {isEditing ? (
-                    <Pencil size={20} style={{ color: "var(--accent-color)" }} />
+                    <Pencil
+                      size={20}
+                      style={{ color: "var(--accent-color)" }}
+                    />
                   ) : (
                     <Plus size={20} style={{ color: "var(--accent-color)" }} />
                   )}
@@ -274,6 +274,7 @@ export default function ProductsView({
                   className="form-input"
                   placeholder="Ex: Teclado Mecânico RGB"
                   value={prodName}
+                  maxLength={150}
                   onChange={(e) => setProdName(e.target.value)}
                   required
                   autoFocus
@@ -289,6 +290,7 @@ export default function ProductsView({
                   className="form-input"
                   placeholder="Ex: 299.90"
                   value={prodPrice}
+                  maxLength={5000}
                   onChange={(e) => setProdPrice(e.target.value)}
                   required
                 />
