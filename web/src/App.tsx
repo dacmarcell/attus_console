@@ -1,11 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
-
-// Import modular components
-import Sidebar from "./components/Sidebar";
-import ErrorBanner from "./components/ErrorBanner";
+import { useCallback, useEffect, useState } from "react";
 import DashboardView from "./components/DashboardView";
-import ProductsView from "./components/ProductsView";
+import ErrorBanner from "./components/ErrorBanner";
 import Modal from "./components/Modal";
+import ProductsView from "./components/ProductsView";
+import Sidebar from "./components/Sidebar";
 import Toast, { type ToastData } from "./components/Toast";
 
 interface Incident {
@@ -37,42 +35,26 @@ interface ModalState {
 }
 
 function App() {
-  // Navigation Routing State
   const [activeView, setActiveView] = useState<"dashboard" | "products">(
     "dashboard",
   );
-
-  // API Config
   const API_BASE_URL = "http://localhost:8080/api";
-
-  // ==========================================
-  // SHARED STATES
-  // ==========================================
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [dashboardLoading, setDashboardLoading] = useState(true);
   const [dashboardError, setDashboardError] = useState<string | null>(null);
-
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const [productsError, setProductsError] = useState<string | null>(null);
-
   const [errorBannerMsg, setErrorBannerMsg] = useState<string | null>(null);
   const [isSendingSimulated, setIsSendingSimulated] = useState(false);
-
-  // Modal state
   const [modal, setModal] = useState<ModalState>({
     isOpen: false,
     title: "",
     message: "",
     type: "success",
   });
-
-  // Toast state
   const [toasts, setToasts] = useState<ToastData[]>([]);
 
-  // ==========================================
-  // TOAST HELPERS
-  // ==========================================
   const addToast = useCallback((type: ToastData["type"], message: string) => {
     const id = `${Date.now()}-${Math.random()}`;
     setToasts((prev) => [...prev, { id, type, message }]);
@@ -82,9 +64,6 @@ function App() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  // ==========================================
-  // MODAL HELPERS
-  // ==========================================
   const showModal = useCallback(
     (
       type: ModalState["type"],
@@ -101,11 +80,6 @@ function App() {
     setModal((prev) => ({ ...prev, isOpen: false, onConfirm: undefined }));
   }, []);
 
-  // ==========================================
-  // API SERVICE CALLS
-  // ==========================================
-
-  // Fetch all incidents
   const fetchIncidents = useCallback(async () => {
     try {
       setDashboardError(null);
@@ -122,7 +96,6 @@ function App() {
     }
   }, []);
 
-  // Fetch all products
   const fetchProducts = useCallback(async () => {
     try {
       setProductsError(null);
@@ -137,11 +110,6 @@ function App() {
     }
   }, []);
 
-  // ==========================================
-  // ACTION CALLBACK HANDLERS
-  // ==========================================
-
-  // Submit manual log
   const handleManualLogSubmit = useCallback(
     async (log: {
       application: string;
@@ -178,7 +146,6 @@ function App() {
     [fetchIncidents, showModal],
   );
 
-  // Simulate 5 logs consecutively to trigger incident
   const handleSimulateIncident = useCallback(
     async (type: "TIMEOUT" | "DATABASE" | "MEMORY") => {
       setIsSendingSimulated(true);
@@ -230,7 +197,7 @@ function App() {
         showModal(
           "success",
           "Simulação Concluída",
-          `5 logs de ${type} foram ingeridos consecutivamente. O painel foi atualizado com os novos incidentes detectados.`,
+          `5 logs de ${type} foram inseridos consecutivamente. O painel foi atualizado com os novos incidentes detectados.`,
         );
       } catch (err: unknown) {
         showModal(
@@ -245,7 +212,6 @@ function App() {
     [fetchIncidents, showModal],
   );
 
-  // Handle product save action (Unified POST / PUT callback)
   const handleSaveProduct = useCallback(
     async (
       payload: { name: string; description: string; price: number },
@@ -254,14 +220,14 @@ function App() {
       try {
         let res;
         if (id) {
-          // Edit Action (PUT)
+          // Edit Action
           res = await fetch(`${API_BASE_URL}/produtos/${id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
           });
         } else {
-          // Create Action (POST)
+          // Create Action
           res = await fetch(`${API_BASE_URL}/produtos`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -299,7 +265,6 @@ function App() {
     [fetchProducts, showModal],
   );
 
-  // Delete product — opens a confirmation modal; actual deletion happens in onConfirm
   const handleDeleteProduct = useCallback(
     (id: number) => {
       showModal(
@@ -338,14 +303,33 @@ function App() {
     [fetchProducts, showModal],
   );
 
-  // Force an intentional browser exception
   const triggerBrowserException = () => {
     throw new Error("Simulação de exceção não tratada no navegador!");
   };
 
-  // SHARED GLOBAL LIFECYCLE (Error capture)
+  const sendBrowserLog = useCallback(
+    async (msg: string, stack: string) => {
+      try {
+        await fetch(`${API_BASE_URL}/logs`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            application: "web-frontend",
+            environment: "production",
+            level: "ERROR",
+            message: msg,
+            stackTrace: stack,
+          }),
+        });
+        fetchIncidents();
+      } catch (e) {
+        console.error("Erro ao enviar log automático:", e);
+      }
+    },
+    [fetchIncidents],
+  );
+
   useEffect(() => {
-    // Initial fetch of DB resources
     fetchIncidents();
     fetchProducts();
 
@@ -386,37 +370,7 @@ function App() {
         handleUnhandledRejection,
       );
     };
-  }, [fetchIncidents, fetchProducts]);
-
-  // Send errors caught globally by the web app
-  const sendBrowserLog = async (msg: string, stack: string) => {
-    try {
-      await fetch(`${API_BASE_URL}/logs`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          application: "web-frontend",
-          environment: "production",
-          level: "ERROR",
-          message: msg,
-          stackTrace: stack,
-        }),
-      });
-      fetchIncidents();
-    } catch (e) {
-      console.error("Erro ao enviar log automático:", e);
-    }
-  };
-
-  // Helper date formatter
-  const formatDate = (dateStr: string) => {
-    try {
-      const date = new Date(dateStr);
-      return date.toLocaleString("pt-BR");
-    } catch {
-      return dateStr;
-    }
-  };
+  }, [fetchIncidents, fetchProducts, sendBrowserLog]);
 
   return (
     <div className="app-container">
@@ -458,7 +412,6 @@ function App() {
             onSimulateIncident={handleSimulateIncident}
             isSimulating={isSendingSimulated}
             onForceError={triggerBrowserException}
-            formatDate={formatDate}
           />
         ) : (
           <ProductsView
@@ -473,19 +426,19 @@ function App() {
         )}
       </div>
 
-      {/* Global Modal (for all success/error/confirm dialogs) */}
-      <Modal
-        isOpen={modal.isOpen}
-        title={modal.title}
-        message={modal.message}
-        type={modal.type}
-        onClose={closeModal}
-        onConfirm={modal.onConfirm}
-        confirmText={modal.type === "confirm" ? "Sim, excluir" : "Confirmar"}
-        cancelText="Cancelar"
-      />
+      {modal.isOpen ? (
+        <Modal
+          isOpen={modal.isOpen}
+          title={modal.title}
+          message={modal.message}
+          type={modal.type}
+          onClose={closeModal}
+          onConfirm={modal.onConfirm}
+          confirmText={modal.type === "confirm" ? "Sim, excluir" : "Confirmar"}
+          cancelText={modal.type === "confirm" ? "Cancelar" : "OK"}
+        />
+      ) : null}
 
-      {/* Global Toast Container */}
       <Toast toasts={toasts} onRemove={removeToast} />
     </div>
   );

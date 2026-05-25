@@ -1,12 +1,8 @@
 interface SeverityBadgeProps {
-  severity: string
+  severity: string;
 }
 
 export default function SeverityBadge({ severity }: SeverityBadgeProps) {
-  const severityLower = severity.toLowerCase()
-  return (
-    <span className={`badge badge-${severityLower}`}>
-      {severity}
-    </span>
-  )
+  const severityLower = severity.toLowerCase();
+  return <span className={`badge badge-${severityLower}`}>{severity}</span>;
 }
