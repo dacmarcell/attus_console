@@ -1,6 +1,7 @@
 import {
   AlertTriangle,
   PackageOpen,
+  Pencil,
   Plus,
   Search,
   Trash2,
@@ -43,6 +44,9 @@ export default function ProductsView({
   const [prodDesc, setProdDesc] = useState("");
   const [prodPrice, setProdPrice] = useState("");
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [editingProductId, setEditingProductId] = useState<number | null>(null);
+
+  const isEditing = editingProductId !== null;
 
   const resetForm = () => {
     setProdName("");
@@ -51,12 +55,22 @@ export default function ProductsView({
   };
 
   const openCreateModal = () => {
+    setEditingProductId(null);
     resetForm();
+    setIsFormModalOpen(true);
+  };
+
+  const openEditModal = (product: Product) => {
+    setEditingProductId(product.id);
+    setProdName(product.name);
+    setProdDesc(product.description ?? "");
+    setProdPrice(String(product.price));
     setIsFormModalOpen(true);
   };
 
   const closeFormModal = () => {
     setIsFormModalOpen(false);
+    setEditingProductId(null);
     resetForm();
   };
 
@@ -80,7 +94,10 @@ export default function ProductsView({
       price: parsedPrice,
     };
 
-    const success = await onSaveProduct(payload);
+    const success = await onSaveProduct(
+      payload,
+      editingProductId ?? undefined,
+    );
 
     if (success) {
       closeFormModal();
@@ -184,6 +201,22 @@ export default function ProductsView({
               <div className="product-card-footer">
                 <div className="btn-action-group">
                   <button
+                    type="button"
+                    className="btn-action btn-action-edit"
+                    onClick={() => openEditModal(product)}
+                  >
+                    <Pencil
+                      size={12}
+                      style={{
+                        display: "inline",
+                        marginRight: "4px",
+                        verticalAlign: "middle",
+                      }}
+                    />{" "}
+                    Editar
+                  </button>
+                  <button
+                    type="button"
                     className="btn-action btn-action-delete"
                     onClick={() => onDeleteProduct(product.id)}
                   >
@@ -214,9 +247,13 @@ export default function ProductsView({
             <div className="modal-form-header">
               <h3 className="modal-title" style={{ marginBottom: 0 }}>
                 <span className="modal-form-icon">
-                  <Plus size={20} style={{ color: "var(--accent-color)" }} />
+                  {isEditing ? (
+                    <Pencil size={20} style={{ color: "var(--accent-color)" }} />
+                  ) : (
+                    <Plus size={20} style={{ color: "var(--accent-color)" }} />
+                  )}
                 </span>
-                Cadastrar Produto
+                {isEditing ? "Editar Produto" : "Cadastrar Produto"}
               </h3>
               <button className="modal-close-btn" onClick={closeFormModal}>
                 <X size={18} />
@@ -224,8 +261,9 @@ export default function ProductsView({
             </div>
 
             <p className="modal-message" style={{ textAlign: "left" }}>
-              Preencha os campos abaixo para adicionar um novo produto à base de
-              dados.
+              {isEditing
+                ? "Altere os campos abaixo para atualizar as informações do produto."
+                : "Preencha os campos abaixo para adicionar um novo produto à base de dados."}
             </p>
 
             <form onSubmit={handleSubmit}>
@@ -280,7 +318,15 @@ export default function ProductsView({
                   className="btn btn-primary"
                   style={{ flex: 1 }}
                 >
-                  <Plus size={16} /> Cadastrar
+                  {isEditing ? (
+                    <>
+                      <Pencil size={16} /> Salvar alterações
+                    </>
+                  ) : (
+                    <>
+                      <Plus size={16} /> Cadastrar
+                    </>
+                  )}
                 </button>
               </div>
             </form>
