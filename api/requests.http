@@ -1,0 +1,61 @@
+@baseUrl = http://localhost:8080/api
+
+### 1. Listar todos os produtos
+GET {{baseUrl}}/produtos
+Accept: application/json
+
+### 2. Criar um novo produto com sucesso
+POST {{baseUrl}}/produtos
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Teclado Mecânico RGB",
+  "description": "Switch Red ergonômico com iluminação RGB",
+  "price": 289.90
+}
+
+### 3. Tentar criar um produto inválido (Preço negativo - HTTP 400)
+POST {{baseUrl}}/produtos
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Mouse Gamer",
+  "description": "Mouse óptico de alta sensibilidade",
+  "price": -15.50
+}
+
+### 4. Tentar criar um produto inválido (Nome vazio - HTTP 400)
+POST {{baseUrl}}/produtos
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "",
+  "description": "Produto sem nome",
+  "price": 99.90
+}
+
+### 5. Buscar produto existente por ID
+GET {{baseUrl}}/produtos/1
+Accept: application/json
+
+### 6. Buscar produto inexistente por ID (HTTP 404)
+GET {{baseUrl}}/produtos/999
+Accept: application/json
+
+### 7. Atualizar produto existente por ID
+PUT {{baseUrl}}/produtos/1
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Teclado Mecânico RGB Premium",
+  "description": "Switch Red ergonômico com iluminação RGB e chassi em alumínio",
+  "price": 329.90
+}
+
+### 8. Excluir produto por ID
+DELETE {{baseUrl}}/produtos/1
+Accept: application/json
