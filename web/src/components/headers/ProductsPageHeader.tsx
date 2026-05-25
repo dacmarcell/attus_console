@@ -4,7 +4,7 @@ export default function ProductsPageHeader() {
       <h1>Gestão de Produtos</h1>
       <p>
         Painel administrativo para inclusão, consulta, edição e exclusão de
-        itens na base de dados.
+        produtos.
       </p>
     </div>
   );

@@ -6,7 +6,6 @@ import {
   Cpu,
   Database,
   FolderOpen,
-  RefreshCw,
   Search,
   Send,
   Terminal,
@@ -31,7 +30,6 @@ interface Props {
   incidents: Incident[];
   loading: boolean;
   error: string | null;
-  onRefresh: () => void;
   onManualLogSubmit: (log: {
     application: string;
     environment: string;
@@ -50,7 +48,6 @@ export default function DashboardView({
   incidents,
   loading,
   error,
-  onRefresh,
   onManualLogSubmit,
   onSimulateIncident,
   isSimulating,
@@ -110,7 +107,7 @@ export default function DashboardView({
           </h2>
           <p className="panel-subtitle">
             Dispare rapidamente uma sequência de 5 logs idênticos à API para
-            testar as regras de agrupamento de incidentes da V1.
+            testar as regras de agrupamento de incidentes.
           </p>
 
           <div className="simulator-buttons">
@@ -177,62 +174,54 @@ export default function DashboardView({
           </h2>
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label className="form-label">Aplicação</label>
-              <input
-                type="text"
-                className="form-input"
+              <label className="form-label">
+                Aplicação <span style={{ color: "#FF7F7F" }}>*</span>
+              </label>
+              <select
+                className="form-select"
                 value={appInput}
                 onChange={(e) => setAppInput(e.target.value)}
-                required
-              />
+              >
+                <option value="api">Api</option>
+                <option value="web-frontend">Web</option>
+              </select>
             </div>
 
             <div className="form-group">
-              <label className="form-label">Ambiente</label>
-              <input
-                type="text"
-                className="form-input"
+              <label className="form-label">
+                Ambiente <span style={{ color: "#FF7F7F" }}>*</span>
+              </label>
+              <select
+                className="form-select"
                 value={envInput}
                 onChange={(e) => setEnvInput(e.target.value)}
-                required
-              />
-            </div>
-
-            <div
-              className="form-group"
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "8px",
-              }}
-            >
-              <div>
-                <label className="form-label">Nível</label>
-                <select
-                  className="form-select"
-                  value={levelInput}
-                  onChange={(e) => setLevelInput(e.target.value)}
-                >
-                  <option value="INFO">INFO</option>
-                  <option value="WARN">WARN</option>
-                  <option value="ERROR">ERROR</option>
-                  <option value="FATAL">FATAL</option>
-                </select>
-              </div>
-              <div>
-                <label className="form-label">Sincronizar</label>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={onRefresh}
-                >
-                  <RefreshCw size={12} /> Atualizar
-                </button>
-              </div>
+              >
+                <option value="production">Production</option>
+                <option value="staging">Staging</option>
+                <option value="development">Development</option>
+              </select>
             </div>
 
             <div className="form-group">
-              <label className="form-label">Mensagem do Erro</label>
+              <label className="form-label">
+                Nível <span style={{ color: "#FF7F7F" }}>*</span>
+              </label>
+              <select
+                className="form-select"
+                value={levelInput}
+                onChange={(e) => setLevelInput(e.target.value)}
+              >
+                <option value="INFO">INFO</option>
+                <option value="WARN">WARN</option>
+                <option value="ERROR">ERROR</option>
+                <option value="FATAL">FATAL</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">
+                Mensagem do Erro <span style={{ color: "#FF7F7F" }}>*</span>
+              </label>
               <input
                 type="text"
                 className="form-input"
@@ -244,7 +233,7 @@ export default function DashboardView({
             </div>
 
             <div className="form-group">
-              <label className="form-label">Stack Trace (Opcional)</label>
+              <label className="form-label">Stack Trace</label>
               <textarea
                 className="form-textarea"
                 value={stackTraceInput}

@@ -143,7 +143,6 @@ export default function DashboardPage() {
         incidents={incidents}
         loading={loading}
         error={error}
-        onRefresh={fetchIncidents}
         onManualLogSubmit={handleManualLogSubmit}
         onSimulateIncident={handleSimulateIncident}
         isSimulating={isSendingSimulated}
