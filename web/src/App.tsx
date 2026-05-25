@@ -239,27 +239,6 @@ function App() {
     throw new Error("Simulação de exceção não tratada no navegador!");
   };
 
-  // Send errors caught globally by the web app
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const sendBrowserLog = async (msg: string, stack: string) => {
-    try {
-      await fetch(`${API_BASE_URL}/logs`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          application: "web-frontend",
-          environment: "production",
-          level: "ERROR",
-          message: msg,
-          stackTrace: stack,
-        }),
-      });
-      fetchIncidents();
-    } catch (e) {
-      console.error("Erro ao enviar log automático:", e);
-    }
-  };
-
   // SHARED GLOBAL LIFECYCLE (Error capture)
   useEffect(() => {
     // Initial fetch of DB resources
@@ -303,7 +282,27 @@ function App() {
         handleUnhandledRejection,
       );
     };
-  }, [sendBrowserLog]);
+  }, []);
+
+  // Send errors caught globally by the web app
+  const sendBrowserLog = async (msg: string, stack: string) => {
+    try {
+      await fetch(`${API_BASE_URL}/logs`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          application: "web-frontend",
+          environment: "production",
+          level: "ERROR",
+          message: msg,
+          stackTrace: stack,
+        }),
+      });
+      fetchIncidents();
+    } catch (e) {
+      console.error("Erro ao enviar log automático:", e);
+    }
+  };
 
   // Helper date formatter
   const formatDate = (dateStr: string) => {
