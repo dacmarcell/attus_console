@@ -58,7 +58,7 @@ export default function DashboardView({
 }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSeverity, setSelectedSeverity] = useState("ALL");
-  const [appInput, setAppInput] = useState("payment-api");
+  const [appInput, setAppInput] = useState("api");
   const [envInput, setEnvInput] = useState("production");
   const [levelInput, setLevelInput] = useState("ERROR");
   const [messageInput, setMessageInput] = useState(

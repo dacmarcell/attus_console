@@ -96,7 +96,7 @@ A API responde no formato JSON (`application/json`) e roda por padrão na porta 
 - **Request Body:**
   ```json
   {
-    "application": "payment-api",
+    "application": "api",
     "environment": "production",
     "level": "ERROR",
     "message": "Connection timed out with gateway after 5000ms",

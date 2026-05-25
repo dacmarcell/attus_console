@@ -1,11 +1,7 @@
 import { Activity, Package } from "lucide-react";
+import { NavLink } from "react-router-dom";
 
-interface Props {
-  activeView: "dashboard" | "products";
-  setActiveView: (view: "dashboard" | "products") => void;
-}
-
-export default function Sidebar({ activeView, setActiveView }: Props) {
+export default function Sidebar() {
   return (
     <nav className="sidebar">
       <div className="brand-section">
@@ -21,22 +17,26 @@ export default function Sidebar({ activeView, setActiveView }: Props) {
 
       <ul className="nav-list">
         <li>
-          <button
-            className={`nav-item-btn ${activeView === "dashboard" ? "active" : ""}`}
-            onClick={() => setActiveView("dashboard")}
-          >
-            <Activity size={18} />
-            Incidentes
-          </button>
-        </li>
-        <li>
-          <button
-            className={`nav-item-btn ${activeView === "products" ? "active" : ""}`}
-            onClick={() => setActiveView("products")}
+          <NavLink
+            to="/produtos"
+            className={({ isActive }) =>
+              `nav-item-btn${isActive ? " active" : ""}`
+            }
           >
             <Package size={18} />
             Produtos
-          </button>
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to="/incidentes"
+            className={({ isActive }) =>
+              `nav-item-btn${isActive ? " active" : ""}`
+            }
+          >
+            <Activity size={18} />
+            Incidentes
+          </NavLink>
         </li>
       </ul>
     </nav>
