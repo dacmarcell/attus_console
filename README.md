@@ -83,3 +83,21 @@ O front-end estará disponível em: **`http://localhost:5173`**. Para ver detalh
 
 Dispare as rotas de teste preparadas utilizando a extensão **REST Client** de dentro do arquivo:
 📄 **api/requests.http**
+
+---
+
+## Nota Técnica — Decisões, Trade-offs e Melhorias Futuras
+
+- **Decisões principais**:
+  - _API_: adotei **Java 21 + Spring Boot** pela maturidade do ecossistema, familiaridade e requisito da vaga.
+  - _Web_: escolhi **React** para desenvolvimento rápido e familiaridade com a lib.
+
+- **Trade-offs**:
+  - O sistema de análise de incidentes utiliza classificação baseada em logica mais simples, ao invés de mecanismos de correlação ou IA. A decisão reduz complexidade, facilita manutenção e torna a lógica mais transparente, mas aumenta a possibilidade de falsos positivos em cenários complexos.
+  - A geração de incidentes ocorre logo após a inserção do log, sem o uso de filas. A abordagem simplifica a arquitetura e reduz dependências externas, porém pode impactar escalabilidade e tempo de resposta em cenários de alto volume de eventos.
+  - A identificação de recorrência utiliza agrupamento por mensagem exata do log, porém não realiza normalização semântica ou aproximação textual, podendo tratar mensagens similares como incidentes distintos.
+
+- **Melhorias futuras recomendadas**:
+  - _API_: adicionar autenticação e autorização, paginação, métricas e observabilidade, políticas de retry e CI. Considerar otimizações de imagens de container.
+  - _Web_: implementar lazy loading, PWA, auditoria de acessibilidade e testes E2E.
+  - _Infra_: externalizar secrets, configurar pipelines de CI/CD, backups e redundancia do banco, deploy em VPS e adicionar monitoramento e alertas.
