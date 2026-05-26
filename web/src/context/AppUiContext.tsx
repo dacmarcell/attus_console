@@ -5,8 +5,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { ModalState, ModalType } from "../types/app";
 import type { ToastData } from "../components/Toast";
+import type { ModalState, ModalType } from "../types/app";
 
 interface AppUiContextValue {
   toasts: ToastData[];
@@ -74,6 +74,7 @@ export function AppUiProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAppUi() {
   const context = useContext(AppUiContext);
   if (!context) {
