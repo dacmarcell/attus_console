@@ -1,5 +1,6 @@
 import {
   AlertTriangle,
+  Loader2,
   PackageOpen,
   Pencil,
   Plus,
@@ -45,6 +46,7 @@ export default function ProductsView({
   const [prodPrice, setProdPrice] = useState("");
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
 
   const isEditing = editingProductId !== null;
 
@@ -77,6 +79,8 @@ export default function ProductsView({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    setIsCreating(true);
+
     if (!prodName.trim()) {
       addToast("warning", "O nome do produto é obrigatório.");
       return;
@@ -99,6 +103,8 @@ export default function ProductsView({
     if (success) {
       closeFormModal();
     }
+
+    setIsCreating(false);
   };
 
   const filteredProducts = products.filter(
@@ -138,8 +144,18 @@ export default function ProductsView({
           className="btn btn-primary"
           style={{ width: "auto", whiteSpace: "nowrap" }}
           onClick={openCreateModal}
+          disabled={loading || error !== null || isCreating}
         >
-          <Plus size={16} /> Cadastrar Produto
+          {isCreating ? (
+            <Loader2
+              size={16}
+              className="animate-spin"
+              style={{ marginRight: "4px" }}
+            />
+          ) : (
+            <Plus size={16} />
+          )}
+          Cadastrar Produto
         </button>
       </div>
 
