@@ -20,7 +20,18 @@ npm install
 npm run dev
 ```
 
-Aplicação disponível em **`http://localhost:5173`**.
+Aplicação disponível em **`http://localhost:5173`** (API em `http://localhost:8080/api`).
+
+### Docker (somente front-end)
+
+Na pasta `web`, com a API já acessível:
+
+```bash
+docker build -t attus-web --build-arg VITE_API_BASE_URL=/api .
+docker run -p 8081:80 --network attus_default attus-web
+```
+
+Recomendado: usar o **docker compose na raiz** do monorepo (ver README principal).
 
 | Script            | Descrição                                 |
 | ----------------- | ----------------------------------------- |

@@ -7,9 +7,37 @@ Este é o repositório principal contendo a solução desenvolvida para o Teste 
 
 ---
 
-## 🚀 Como Executar o Repositório Localmente
+## 🚀 Como Executar o Repositório
 
-### Pré-requisitos
+### Opção 1: Docker Compose (recomendado)
+
+**Pré-requisito:** [Docker](https://docs.docker.com/get-docker/) e Docker Compose.
+
+Na raiz do repositório:
+
+```bash
+docker compose up --build
+```
+
+| Serviço        | URL                       | Descrição                                     |
+| -------------- | ------------------------- | --------------------------------------------- |
+| **Web**        | http://localhost:80       | Front-end (Nginx + proxy `/api` → API)        |
+| **API**        | http://localhost:8080/api | Back-end Spring Boot                          |
+| **PostgreSQL** | `localhost:5432`          | Banco `attus` (user `postgres`, senha `root`) |
+
+Comandos úteis:
+
+```bash
+docker compose up --build -d    # em segundo plano
+docker compose down             # parar e remover containers
+docker compose down -v          # parar e apagar volume do banco
+```
+
+---
+
+### Opção 2: Execução local (desenvolvimento)
+
+**Pré-requisitos**
 
 - **Java Development Kit (JDK) 21** instalado.
 - **Node.js 18+** e **npm** instalados.
