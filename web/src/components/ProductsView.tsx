@@ -218,30 +218,14 @@ export default function ProductsView({
                     className="btn-action btn-action-edit"
                     onClick={() => openEditModal(product)}
                   >
-                    <Pencil
-                      size={12}
-                      style={{
-                        display: "inline",
-                        marginRight: "4px",
-                        verticalAlign: "middle",
-                      }}
-                    />{" "}
-                    Editar
+                    <Pencil size={12} />{" "}
                   </button>
                   <button
                     type="button"
                     className="btn-action btn-action-delete"
                     onClick={() => onDeleteProduct(product.id)}
                   >
-                    <Trash2
-                      size={12}
-                      style={{
-                        display: "inline",
-                        marginRight: "4px",
-                        verticalAlign: "middle",
-                      }}
-                    />{" "}
-                    Deletar
+                    <Trash2 size={12} />
                   </button>
                 </div>
               </div>
