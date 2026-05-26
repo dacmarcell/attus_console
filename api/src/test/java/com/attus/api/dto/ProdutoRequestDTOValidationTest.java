@@ -56,6 +56,26 @@ class ProdutoRequestDTOValidationTest {
     }
 
     @Test
+    void blankName_isRejected() {
+        var dto = new ProdutoRequestDTO("   ", null, new BigDecimal("10"));
+
+        Set<ConstraintViolation<ProdutoRequestDTO>> violations = validator.validate(dto);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> "name".equals(v.getPropertyPath().toString())));
+    }
+
+    @Test
+    void nonPositivePrice_isRejected() {
+        var dto = new ProdutoRequestDTO("Produto", null, new BigDecimal("0"));
+
+        Set<ConstraintViolation<ProdutoRequestDTO>> violations = validator.validate(dto);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> "price".equals(v.getPropertyPath().toString())));
+    }
+
+    @Test
     void priceExceedsDigits_isRejected() {
         var dto = new ProdutoRequestDTO("Produto", null, new BigDecimal("123456789.99"));
 
