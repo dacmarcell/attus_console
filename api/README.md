@@ -154,6 +154,24 @@ A API estará ativa em **`http://localhost:8080`**.
 
 ---
 
-## 🧪 Testes e Validação Rápida
+## 🧪 Testes
+
+### Testes unitários e de API (Maven)
+
+```bash
+cd api
+./mvnw test
+```
+
+| Cenários cobertos                                              |
+| -------------------------------------------------------------- |
+| Classificação por keyword (timeout, database, memory, default) |
+| Limiar de 5 logs, criação e atualização de incidentes          |
+| CRUD completo e `ProdutoNotFoundException`                     |
+| Bean Validation de `ProdutoRequestDTO` e `LogRequestDTO`       |
+| Respostas 400, 404 e 500                                       |
+| Endpoints REST com `MockMvc` (`@WebMvcTest`)                   |
+
+### Validação manual (REST Client)
 
 Utilize a extensão **REST Client** do seu editor e execute os blocos de teste preparados diretamente do arquivo **requests.http**. Ele possui fluxos isolados e encadeados para validar a ingestão manual, erros de validação e a geração programática de incidentes.
