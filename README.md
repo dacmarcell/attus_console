@@ -1,6 +1,6 @@
 # Teste Técnico Attus
 
-Este é o repositório principal contendo a solução desenvolvida para o Teste Técnico Attus. O projeto está estruturado em formato de monorepo dividido em duas aplicações principais:
+Este é o repositório principal contendo a solução desenvolvida para o Teste Técnico da Attus. O projeto está estruturado em formato de monorepo dividido em duas aplicações principais:
 
 - 📁 **api/**: Aplicação Back-end RESTful desenvolvida em **Java 21** e **Spring Boot** com banco de dados **PostgreSQL**.
 - 📁 **web/**: Aplicação Front-end SPA moderna em **React**, **TypeScript** e **Vite**.
