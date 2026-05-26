@@ -307,8 +307,7 @@ export default function DashboardView({
               size={18}
               style={{ marginRight: "8px", verticalAlign: "middle" }}
             />
-            <strong>Conectividade API:</strong> {error}. Verifique se o backend
-            está ativo na porta 8080.
+            <strong>Conectividade API:</strong> {error}.
           </div>
         )}
 
@@ -364,7 +363,7 @@ export default function DashboardView({
 
                   <p className="incident-message">{incident.message}</p>
 
-                    <div className="suggestions-grid">
+                  <div className="suggestions-grid">
                     <div className="suggestion-block">
                       <h4 className="suggestion-block-title">
                         <Lightbulb
