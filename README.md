@@ -1,4 +1,4 @@
-# Teste Técnico Attus - Monorepo
+# Teste Técnico Attus
 
 Este é o repositório principal contendo a solução desenvolvida para o Teste Técnico Attus. O projeto está estruturado em formato de monorepo dividido em duas aplicações principais:
 
@@ -47,7 +47,7 @@ npm install
 npm run dev
 ```
 
-O front-end estará disponível em: **`http://localhost:5173`**.
+O front-end estará disponível em: **`http://localhost:5173`**. Para ver detalhes do front-end, acesse: **📖 web/README.md**
 
 ---
 
