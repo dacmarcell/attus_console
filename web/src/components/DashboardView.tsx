@@ -6,8 +6,12 @@ import {
   Cpu,
   Database,
   FolderOpen,
+  Check,
+  Lightbulb,
   Search,
   Send,
+  Shield,
+  ShieldCheck,
   Terminal,
   WifiOff,
 } from "lucide-react";
@@ -360,21 +364,49 @@ export default function DashboardView({
 
                   <p className="incident-message">{incident.message}</p>
 
-                  <div className="suggestions-grid">
+                    <div className="suggestions-grid">
                     <div className="suggestion-block">
-                      <h4>💡 Recomendações</h4>
+                      <h4 className="suggestion-block-title">
+                        <Lightbulb
+                          size={16}
+                          className="suggestion-block-icon"
+                          aria-hidden
+                        />
+                        Recomendações
+                      </h4>
                       <ul>
                         {incident.recommendations.split(";").map((rec, i) => (
-                          <li key={i}>{rec.trim()}</li>
+                          <li key={i} className="suggestion-list-item">
+                            <Check
+                              size={14}
+                              className="suggestion-list-icon"
+                              aria-hidden
+                            />
+                            <span>{rec.trim()}</span>
+                          </li>
                         ))}
                       </ul>
                     </div>
 
                     <div className="suggestion-block">
-                      <h4>🛡️ Medidas Preventivas</h4>
+                      <h4 className="suggestion-block-title">
+                        <Shield
+                          size={16}
+                          className="suggestion-block-icon"
+                          aria-hidden
+                        />
+                        Medidas Preventivas
+                      </h4>
                       <ul>
                         {incident.preventions.split(";").map((prev, i) => (
-                          <li key={i}>{prev.trim()}</li>
+                          <li key={i} className="suggestion-list-item">
+                            <ShieldCheck
+                              size={14}
+                              className="suggestion-list-icon"
+                              aria-hidden
+                            />
+                            <span>{prev.trim()}</span>
+                          </li>
                         ))}
                       </ul>
                     </div>

@@ -602,30 +602,39 @@ body {
   }
 }
 
-.suggestion-block h4 {
+.suggestion-block-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 0.85rem;
   font-weight: 700;
   color: #fff;
   margin-bottom: 6px;
 }
 
+.suggestion-block-icon {
+  flex-shrink: 0;
+  color: var(--accent-color);
+}
+
 .suggestion-block ul {
   list-style: none;
 }
 
-.suggestion-block li {
+.suggestion-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
   font-size: 0.8rem;
   color: var(--text-secondary);
-  margin-bottom: 3px;
-  position: relative;
-  padding-left: 12px;
+  margin-bottom: 6px;
 }
 
-.suggestion-block li::before {
-  content: "•";
+.suggestion-list-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
   color: var(--accent-color);
-  position: absolute;
-  left: 0;
+  opacity: 0.9;
 }
 
 /* ==========================================
