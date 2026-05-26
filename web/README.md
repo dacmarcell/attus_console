@@ -28,6 +28,39 @@ Aplicação disponível em **`http://localhost:5173`**.
 | `npm run build`   | Type-check + build de produção em `dist/` |
 | `npm run preview` | Pré-visualização do build                 |
 | `npm run lint`    | ESLint                                    |
+| `npm run test`    | Vitest em modo watch                      |
+| `npm run test:run`| Vitest (execução única, CI)                |
+
+---
+
+## Testes
+
+Stack: **Vitest**, **Testing Library**, **jsdom**. A API é simulada com `vi.stubGlobal("fetch", ...)`.
+
+```bash
+cd web
+npm run test:run
+```
+
+### Unitários
+
+| Arquivo | Cenários |
+| ------- | -------- |
+| `utils/helpers.test.ts` | Formatação de data |
+| `components/SeverityBadge.test.tsx` | Classes e texto da severidade |
+| `components/ProductsView.test.tsx` | Listagem, busca, validações, criar/editar/excluir |
+| `components/DashboardView.test.tsx` | Incidentes, filtros, simulação, log vazio |
+| `context/AppUiContext.test.tsx` | Modal, toast, erro fora do provider |
+
+### Integração
+
+| Arquivo | Cenários |
+| ------- | -------- |
+| `pages/ProductsPage.integration.test.tsx` | GET produtos, POST com modal de sucesso, erro de rede |
+| `pages/DashboardPage.integration.test.tsx` | GET incidentes, POST log, erro de listagem |
+| `routes/AppRoutes.integration.test.tsx` | Redirect `/` → produtos, navegação sidebar |
+
+Utilitários em `src/test/`: `test-utils.tsx` (provider + modal/toast), `fixtures.ts`, `product-form.ts`.
 
 ---
 
@@ -46,6 +79,8 @@ Aplicação disponível em **`http://localhost:5173`**.
 - **React 19**
 - **TypeScript**
 - **Vite 8**
+- **react-router-dom** — roteamento
+- **Vitest** + **Testing Library** — testes
 
 ---
 
